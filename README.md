@@ -77,6 +77,58 @@ agentic-copilot-mvp/
         └— agent_core.Dockerfile
 ```
 
+
+# 📦 `agentic-copilot-mvp/` - Module Overview (Retail AI Copilot)
+
+This document provides a structured overview of all modules and scripts in the `agentic-copilot-mvp` system.
+
+| **Module**          | **Script/File**                 | **Description** |
+|---------------------|----------------------------------|------------------|
+| `gateway/`          | `main.py`                        | Start FastAPI server with middleware. |
+|                     | `routes.py`                      | API routes: `/chat`, `/agent`, `/health`. |
+|                     | `auth.py`                        | JWT, OAuth2 authentication and role validation. |
+|                     | `rate_limiter.py`                | Limit API requests to prevent abuse. |
+| `orchestrator/`     | `root_agent.py`                  | Root agent orchestrator logic. |
+|                     | `a2a_protocol.py`                | Agent-to-agent communication protocol. |
+|                     | `mcp_router.py`                  | Orchestrate LLM, Tools, RAG using MCP context. |
+| `agents/`           | `product_agent.py`               | Agent for product and promotion queries. |
+|                     | `policy_agent.py`                | Agent for warranty, return/exchange policies. |
+| `mcp_context/`      | `base_schema.py`                 | Base MCP schema class. |
+|                     | `context_builder.py`             | Build MCPContext object from input prompt. |
+|                     | `logger.py`                      | Log MCP trace, decisions, tools used. |
+|                     | `schemas/product_agent.json`     | MCP schema for product agent. |
+|                     | `schemas/policy_agent.json`      | MCP schema for policy agent. |
+| `rag/`              | `embed.py`                       | Embed documents using SBERT/OpenAI. |
+|                     | `retriever.py`                   | Retrieve text from VectorDB. |
+|                     | `documents/product_knowledge/`   | Product data (Excel, PDF). |
+|                     | `documents/policies/`            | Policy documents for internal support. |
+| `tools/`            | `product_tool.py`                | Mocked API for promotion and installment. |
+|                     | `policy_tool.py`                 | Mocked API for warranty and return validation. |
+| `memory/`           | `redis_memory.py`                | Redis-based short-term session memory. |
+|                     | `vector_memory.py`               | Long-term semantic memory using FAISS/Chroma. |
+|                     | `task_trace.py`                  | Track agent execution across user sessions. |
+| `cache/`            | `gpt_cache.py`                   | Cache OpenAI GPT responses. |
+|                     | `rag_cache.py`                   | Cache for retrieved documents. |
+|                     | `tool_cache.py`                  | Cache tool responses (mocked or real). |
+| `ui/`               | `app.py`                         | Streamlit interface to interact with agents. |
+|                     | `components/chat_box.py`         | Chat box component UI. |
+| `config/`           | `settings.py`                    | Central configuration and environment variables. |
+|                     | `secrets_template.json`          | Example secret file for dev setup. |
+| `tests/`            | `test_gateway.py`                | Unit tests for API gateway. |
+|                     | `test_agents.py`                 | Tests for agent decision logic. |
+|                     | `test_rag.py`                    | Tests for RAG document retrieval. |
+| `cicd/`             | `github_actions.yml`             | GitHub Actions for CI/CD. |
+|                     | `dockerfiles/gateway.Dockerfile` | Docker setup for Gateway. |
+|                     | `dockerfiles/agent_core.Dockerfile`| Docker for agent core service. |
+| `analytics/`        | `metrics_collector.py`           | Collect usage and latency metrics. |
+|                     | `feedback_logger.py`             | Log user feedback and scores. |
+|                     | `user_stats.py`                  | Aggregate session statistics. |
+| `eventbus/`         | `producer.py`                    | Publish events for async tasks. |
+|                     | `consumer.py`                    | Listen to events (Kafka/Redis) for background work. |
+| `scripts/`          | `init_embed.py`                  | Embed full Datahub knowledge base. |
+|                     | `test_agent.py`                  | CLI agent testing script. |
+| `docs/`             | `api_docs.md`                    | Markdown documentation for all endpoints. |
+
 ## 📊 Chức năng của Agents
 
 ### ạ. `product_agent.py`
