@@ -1,3 +1,126 @@
+# Agentic Copilot MVP: Retail Edition
+
+## 🌐 Mục tiêu
+
+Xây dựng một hệ thống AI Agent để hỗ trợ nhân viên bán hàng và CSKH trong doanh nghiệp bán lẻ (Retail), đặc biệt là trong ngành điện thoại di động.
+
+## ⚡ Kiến trúc chuẩn hóa
+
+```
+agentic-copilot-mvp/
+├— README.md
+├— docker-compose.yml
+├— .env.example
+├— requirements.txt
+
+├— gateway/                ➜ API Gateway (FastAPI)
+│   ├— main.py              ➜ Khởi chạy FastAPI
+│   ├— routes.py            ➜ Định tuyến API
+│   ├— auth.py              ➜ Xác thực JWT, vai trò
+│   └— rate_limiter.py      ➜ Shield spam/abuse
+
+├— orchestrator/          ➜ ADK Orchestrator Agent
+│   ├— root_agent.py        ➜ Root Agent + Workflow logic
+│   ├— a2a_protocol.py       ➜ Giao tiếp giữa agents
+│   └— mcp_router.py        ➜ Liên kết LLM + RAG + Tools
+
+├— agents/
+│   └— product_agent.py     ➜ Tư vấn sản phẩm, CTKM
+│   └— policy_agent.py      ➜ Trợ lý bảo hành, đổi trả
+
+├— mcp_context/           ➜ MCP Protocol & Trace
+│   ├— base_schema.py
+│   ├— context_builder.py
+│   ├— schemas/
+│   │   ├— product_agent.json
+│   │   └— policy_agent.json
+│   └— logger.py
+
+├— rag/                    ➜ RAG Retrieval Layer
+│   ├— embed.py            ➜ Huggingface Embedding
+│   ├— retriever.py        ➜ Chroma / Weaviate
+│   └— documents/
+│       └— product_knowledge/ & policies/
+
+├— tools/                  ➜ Tool API (Mock or Real)
+│   ├— product_tool.py
+│   └— policy_tool.py
+
+├— memory/                ➜ Short-term / Long-term memory
+│   ├— redis_memory.py     ➜ Redis
+│   ├— vector_memory.py    ➜ FAISS / Chroma
+│   └— task_trace.py       ➜ Theo dõi task
+
+├— cache/                 ➜ Cache GPT, RAG, Tool
+│   ├— gpt_cache.py
+│   ├— rag_cache.py
+│   └— tool_cache.py
+
+├— ui/                    ➜ Streamlit UI / Chat
+│   ├— app.py
+│   └— components/
+│       └— chat_box.py
+
+├— config/                ➜ Config trung tâm
+│   ├— settings.py
+│   └— secrets_template.json
+
+├— tests/                 ➜ Unit Test
+│   ├— test_gateway.py
+│   ├— test_agents.py
+│   └— test_rag.py
+
+└— cicd/                  ➜ CI/CD
+    ├— github_actions.yml
+    └— dockerfiles/
+        ├— gateway.Dockerfile
+        └— agent_core.Dockerfile
+```
+
+## 📊 Chức năng của Agents
+
+### ạ. `product_agent.py`
+
+* Truy vấn sản phẩm từ DataHub (Excel/PDF)
+* Tư vấn giá, chi nhánh, khuyến mãi
+* Hỗ trợ nhân viên hoặc khách hàng cuối
+
+### ạ. `policy_agent.py`
+
+* Trích luật bảo hành, đổi trả từ Document\_DDV
+* Trả lời câu hỏi logic, truy vết đến file nguồn
+* Tổng hợp các kịch bản xử lý với khách
+
+## ✅ Hướng dẫn chạy local
+
+```bash
+# Cài môi trường
+cp .env.example .env
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+
+# Nhúng documents
+python rag/embed.py
+
+# Khởi động FastAPI + Agent
+uvicorn gateway.main:app --reload
+
+# Chạy UI
+streamlit run ui/app.py
+```
+
+## 📕 Roadmap 2 ngày
+
+| Ngày   | Mô tả                                            | Output                                 |
+| ------ | ------------------------------------------------ | -------------------------------------- |
+| Ngày 1 | Tạo base repo, build agent, load Datahub.zip     | Base repo chạy local, RAG embed xong   |
+| Ngày 2 | Hook 2 Agents, test MCP + UI, add PromptTemplate | Agents trả lời thực tế + deploy Docker |
+
+---
+
+Sếp muốn mở rộng RAG-AAS hoặc integration với Claude/Rowboat em triển tiếp nha!
+
+
 ```mermaid
 %%{init: {"theme": "default", "themeVariables": {
   "actorBkg": "#e3f2fd",
