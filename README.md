@@ -396,3 +396,83 @@ sequenceDiagram
     UI ->> Staff: Hiển thị thông tin
 
 ```
+
+
+# Tình huống: Workflow của 2 Agent chính
+1️⃣ Sales Advisor Agent (Tư vấn sản phẩm + khuyến mãi)
+🎯 Mục tiêu:
+Hỗ trợ tư vấn sản phẩm, chính sách khuyến mãi, trả góp, phụ kiện... cho nhân viên bán hàng hoặc khách hàng cuối.
+
+🔁 Luồng làm việc:
+🧑‍💼 Người dùng (Sales hoặc khách hàng) gửi câu hỏi:
+
+“iPhone 15 Pro có trả góp 0% không?”
+
+“So sánh iPhone 15 vs 14 Pro Max?”
+
+💬 Prompt được chuyển đến FastAPI Gateway, xác thực quyền truy cập.
+
+🧠 Root Agent nhận prompt, định tuyến đến Sales Advisor Agent.
+
+📜 Agent tự động tạo MCPContext bao gồm:
+
+Intent: product_info, compare, promotion_policy
+
+Entities: iPhone 15, 14 Pro Max, installment
+
+📚 Agent kích hoạt RAG Retriever để tìm kiến thức từ Datahub/San_pham/:
+
+Tìm file Excel/PDF có bảng trả góp, thông số sản phẩm
+
+Truy vấn khuyến mãi hiện hành
+
+🔧 Nếu cần xác thực thêm:
+
+Gọi PromoAPI, InstallmentAPI qua Tool Executor
+
+🤖 LLM tổng hợp lại kết quả, sinh câu trả lời thân thiện:
+
+Có thể gợi ý combo upsell (ốp, sạc), highlight chính sách trả góp
+
+📝 MCP Logger lưu lại: câu hỏi, tài liệu được truy xuất, câu trả lời
+
+📤 Gửi lại cho người dùng
+
+2️⃣ Internal Support Agent (Trả lời bảo hành, đổi trả, chính sách nội bộ)
+🎯 Mục tiêu:
+Cung cấp nhanh chính sách bảo hành/đổi trả từ tài liệu nội bộ (Datahub/Document_DDV) cho nhân viên.
+
+🔁 Luồng làm việc:
+🧑‍💼 Nhân viên gửi tình huống:
+
+“Khách mua iPhone 14 Pro Max lỗi sọc màn hình sau 33 ngày có được đổi không?”
+
+Gateway → Root Agent định tuyến đến Internal Support Agent
+
+📜 Agent tạo MCPContext:
+
+Intent: policy_check
+
+Entities: sản phẩm, tình trạng, thời gian mua, loại lỗi
+
+📚 RAG truy xuất chính sách từ Document_DDV/*.pdf:
+
+Trích đoạn văn bản gốc có nội dung liên quan
+
+🔧 Gọi PolicyAPI nếu cần lấy chính sách đặc thù (ví dụ: đổi trả riêng của dòng Likenew)
+
+🤖 LLM tổng hợp nội dung:
+
+Phân tích theo logic (thời gian, điều kiện đủ đổi)
+
+Soạn sẵn kịch bản thuyết phục khách
+
+📁 Tài liệu nguồn được ghi log, trích dẫn trong phản hồi
+
+📤 Gửi câu trả lời kèm logic ra quyết định cho nhân viên
+
+✅ Tính năng bổ sung (cho cả hai agent)
+Thành phần	Vai trò
+Memory Manager	Nhớ lịch sử tương tác, session giữa user và agent, dùng để giữ ngữ cảnh cuộc hội thoại.
+Cache Layer	Lưu lại kết quả truy vấn sản phẩm, khuyến mãi hoặc chính sách từng được hỏi để tăng tốc độ phản hồi.
+Telemetry / Log	Theo dõi hành vi người dùng, hiệu quả agent, lỗi truy xuất — giúp cải thiện dần chất lượng phản hồi.
